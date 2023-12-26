@@ -13,36 +13,26 @@ const App = () => {
         navigate(enlace);
     };
 
-    const reiniciarBD = () => {
-      axios.post('http://172.28.152.110:5050/reiniciar')
-      .then((response) => {
-        // Maneja la respuesta exitosa
-        navigate('/mensaje', { state: { mensaje: '¡Base de datos reiniciada con éxito!' } });
-    })
-    .catch((error) => {
-        // Maneja los errores
-        navigate('/mensaje', { state: { mensaje: 'Error al reiniciar la base de datos: ', error } });
-    });
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Image style={styles.image} source={require('../LogoMcAndCheese.png')} />
-        <Text style={styles.title}>McAndCheese - Seminario 2</Text>
+        <Text style={styles.title}>McAndCheese - Práctica 3</Text>
       </View>
-      <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/añade')}>
-          <Text style={styles.pressableText}>Añadir Stock</Text>
+      <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/menu')}>
+          <Text style={styles.pressableText}>Subsistema de Menú</Text>
       </Pressable>  
-      <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/resta')}>
-          <Text style={styles.pressableText}>Restar Stock</Text>
+      <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/clientes')}>
+          <Text style={styles.pressableText}>Subsistema de Clientes</Text>
+      </Pressable>  
+      <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/pedidos')}>
+          <Text style={styles.pressableText}>Subsistema de Pedidos</Text>
+      </Pressable>  
+      <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/reservas')}>
+          <Text style={styles.pressableText}>Subsistema de Reservas</Text>
       </Pressable>
-      <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/ver')}>
-          <Text style={styles.pressableText}>Ver Stock</Text>
-      </Pressable>
-
-      <Pressable style={styles.pressableButton} onPress={() => reiniciarBD()}>
-          <Text style={styles.pressableText}>Reiniciar BD</Text>
+      <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/trabajadores')}>
+          <Text style={styles.pressableText}>Subsistema de Trabajadores</Text>
       </Pressable>
     </View>
   );

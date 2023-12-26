@@ -3,7 +3,7 @@ import { View, Text, Pressable, StyleSheet, Image } from 'react-native';
 import { useNavigate } from 'react-router-native';
 import axios from 'axios';
 
-const VerStock = () => {
+const Menú = () => {
   const [stockData, setStockData] = useState([]);
   const navigate = useNavigate();
 
@@ -28,27 +28,10 @@ const VerStock = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Image style={styles.image} source={require('../LogoMcAndCheese.png')} />
-        <Text style={styles.title}>McAndCheese - Seminario 2</Text>
+        <Image style={styles.image} source={require('../../LogoMcAndCheese.png')} />
+        <Text style={styles.title}>McAndCheese - Práctica 3</Text>
       </View>
-      <Text style={styles.text}>La tabla STOCK tiene la siguiente información: </Text>
-
-      {stockData.length > 0 ? (
-        <>
-          <View style={styles.tableRow}>
-            <Text style={styles.tableTitle}>ID Producto</Text>
-            <Text style={styles.tableTitle}>Cantidad</Text>
-          </View>
-          {stockData.map((item) => (
-            <View key={item.Cproducto} style={styles.tableRow}>
-              <Text style={styles.tableCell}>{item.Cproducto}</Text>
-              <Text style={styles.tableCell}>{item.Cantidad}</Text>
-            </View>
-          ))}
-        </>
-      ) : (
-        <Text style={styles.text}>No hay datos disponibles</Text>
-      )}
+      <Text style={styles.title}>Subsistema de Menú</Text>
 
       <Pressable style={[styles.pressableButton, { alignSelf: 'center' }]} onPress={() => handleButtonClick('/')}>
         <Text style={styles.pressableText}>Volver</Text>
@@ -60,65 +43,50 @@ const VerStock = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
   header: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  image: {
-    width: 100,
-    height: 100,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 10,
-  },
-  text: {
-    fontSize: 16,
-    marginTop: 10,
-    alignSelf: 'center',
-  },
-  tableRow: {
-    flexDirection: 'row',
-    paddingHorizontal: 10,
-    marginBottom: 5,
-    alignSelf: 'center',
-    marginTop: 10
-  },
-  tableCell: {
-    fontSize: 16,
-    marginRight: 50,
-    marginLeft:50
-  },
-  tableTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginRight: 10,
-    marginLeft:10
+    marginLeft: 20,
+  },
+  image: {
+    width: 200, // Ajusta el ancho según tus necesidades
+    height: 200, // Ajusta la altura según tus necesidades
+    borderRadius: 0,
+    marginBottom: 20,
   },
   pressableButton: {
-    width: 150,
+    width: 200,
     height: 50,
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',
-    backgroundColor: '#049CDC',
+    backgroundColor: '#049CDC',  // Un verde fresco, puedes cambiarlo según tus preferencias
     borderRadius: 10,
-    elevation: 3,
+    elevation: 3, // Sombra para un efecto de elevación
     marginBottom: 15,
     marginTop: 15,
     paddingHorizontal: 20,
     paddingVertical: 10,
-  },
-  pressableText: {
+  }, pressableText: {
     color: 'white',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: 'bold', // Texto en negrita
     textAlign: 'center',
   },
+  text:{
+    marginBottom: 100,
+    marginTop: 100,
+    fontSize: 14,
+    fontWeight: 'bold'
+  }
 });
 
-export default VerStock;
+export default Menú;
