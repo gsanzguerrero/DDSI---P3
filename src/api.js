@@ -13,11 +13,11 @@ app.use(express.json());
 
 const dbConfig = {
   //host: "localhost",
-  host: "172.28.152.110",
+  host: "localhost",
   user: "root",
-  password: "sem2",
-  database: "seminario2",
-  port: "3306"
+  password: "admin",
+  database: "ddsip3",
+  port: "3000"
 };
 
 async function abrirConexion(){
@@ -25,133 +25,39 @@ async function abrirConexion(){
   return connection;
 } 
 
-app.get('/ver', async (req, res) => { // GET Usuarios
+
+app.post('/crearcliente', async (req, res) => {
   try {
-      const connection = await abrirConexion();
-      const queryUsuarios = 'SELECT * FROM STOCK';
-      const [resultado] = await connection.promise().query(queryUsuarios);
-      connection.end(); // Libera recursos BD
-      connection.destroy();
-      res.json([resultado]); // Resultado servido en HTTP formato JSON
-    } catch (error) {
-      console.error('Error al obtener datos:', error);
-      res.status(500).json({ error: 'Error al obtener datos' });
-    }
+    const connection = await abrirConexion();
+    const { email, nombre, date, username, contraseña, domicilio, datosPago } = req.body;
+    const querySelect = 'INSERT INTO CLIENTES (IdCliente, Nombre, Username, Contrasenia, Domicilio, Puntos, FechaNacimiento, DatosDePago) VALUES (?, ?, ?, ?, ?, 0, ?, ?)';
 
-  });
+    // Cambiar el nombre de la variable result
+    const result = await connection.promise().query(querySelect, [email, nombre, username, contraseña, domicilio, date, datosPago]);
+    
+    connection.end(); // Liberar recursos BD
+    connection.destroy();
 
-  app.post('/aniadir', async (req, res) => {
-    try {
-      const connection = await abrirConexion();
-      const { Cproducto, cantidad } = req.body;
-  
-      // Convertir la cantidad a un número
-      const cantidadNumerica = parseInt(cantidad);
-  
-      // Obtener el stock actual
-      const querySelect = 'SELECT Cantidad FROM STOCK WHERE Cproducto = ?';
-      const [stockAnterior] = await connection.promise().query(querySelect, [Cproducto]);
-  
-      if (stockAnterior.length === 0) {
-        // Si no se encuentra el producto en el stock, devolver un error
-        return res.status(404).json({ error: 'Error al restar el stock: producto no encontrado en el stock' });
-      }
-  
-      const stockAnteriorCantidad = stockAnterior[0].Cantidad;
-  
-      // Calcular el nuevo stock
-      const nuevoStock = stockAnteriorCantidad + cantidadNumerica;
-  
-      const queryUpdate = 'UPDATE STOCK SET Cantidad = ? WHERE Cproducto = ?';
-      await connection.promise().query(queryUpdate, [nuevoStock, Cproducto]);
-  
-      connection.end(); // Liberar recursos BD
-      connection.destroy();
-  
-      // Devolver la respuesta exitosa
-      res.status(200).json({ mensaje: 'Stock actualizado correctamente' });
-    } catch (error) {
-      console.error('Error al sumar stock:', error);
-      res.status(500).json({ error: 'Error al sumar stock' });
-    }
-  });
+    // Devolver la respuesta exitosa
+    res.status(200).json({ mensaje: 'Cliente creado correctamente' });
+  } catch (error) {
+    console.error('Error al crear cliente:', error);
+    res.status(500).json({ error: 'Error al crear cliente' });
+  }
+});
 
-  app.post('/reiniciar', async (req, res) => {
-    try {
-      const connection = await abrirConexion();
-  
-      // Sentencias SQL para reiniciar la tabla STOCK
-      const sqlStatements = [
-        'DROP TABLE IF EXISTS STOCK;',
-        'CREATE TABLE IF NOT EXISTS STOCK (Cproducto int, Cantidad int CHECK (Cantidad >= 0), primary key(Cproducto));',
-        'INSERT IGNORE INTO STOCK(Cproducto, Cantidad) VALUES(1,5);',
-        'INSERT IGNORE INTO STOCK(Cproducto, Cantidad) VALUES(2,5);',
-        'INSERT IGNORE INTO STOCK(Cproducto, Cantidad) VALUES(3,5);',
-        'INSERT IGNORE INTO STOCK(Cproducto, Cantidad) VALUES(4,5);',
-        'INSERT IGNORE INTO STOCK(Cproducto, Cantidad) VALUES(5,5);',
-        'INSERT IGNORE INTO STOCK(Cproducto, Cantidad) VALUES(6,5);',
-        'INSERT IGNORE INTO STOCK(Cproducto, Cantidad) VALUES(7,5);',
-        'INSERT IGNORE INTO STOCK(Cproducto, Cantidad) VALUES(8,5);',
-        'INSERT IGNORE INTO STOCK(Cproducto, Cantidad) VALUES(9,5);',
-        'INSERT IGNORE INTO STOCK(Cproducto, Cantidad) VALUES(10,5);'
-      ];
-  
-      // Ejecutar las sentencias SQL
-      for (const sqlStatement of sqlStatements) {
-        await connection.promise().query(sqlStatement);
-      }
-  
-      connection.end(); // Liberar recursos BD
-      connection.destroy();
-  
-      // Devolver la respuesta exitosa
-      res.status(200).json({ mensaje: 'Tabla STOCK reiniciada correctamente' });
-    } catch (error) {
-      console.error('Error al reiniciar la tabla STOCK:', error);
-      res.status(500).json({ error: 'Error al reiniciar la tabla STOCK' });
-    }
-  });
-  
-  
-
-  app.post('/restar', async (req, res) => {
-    try {
-      const connection = await abrirConexion();
-      const { Cproducto, cantidad } = req.body;
-  
-      // Obtener el stock actual
-      const querySelect = 'SELECT Cantidad FROM STOCK WHERE Cproducto = ?';
-      const [stockAnterior] = await connection.promise().query(querySelect, [Cproducto]);
-  
-      if (stockAnterior.length === 0) {
-        // Si no se encuentra el producto en el stock, devolver un error
-        return res.status(404).json({ error: 'Error al restar el stock: producto no encontrado en el stock' });
-      }
-  
-      const stockAnteriorCantidad = stockAnterior[0].Cantidad;
-  
-      // Calcular el nuevo stock
-      const nuevoStock = stockAnteriorCantidad - cantidad;
-  
-      if (nuevoStock < 0) {
-        // Si el nuevo stock es negativo, devolver un error
-        return res.status(400).json({ error: 'Error al restar el stock: ¡El stock no puede ser menor de 0!' });
-      }
-  
-      // Actualizar el stock en la base de datos
-      const queryUpdate = 'UPDATE STOCK SET Cantidad = ? WHERE Cproducto = ?';
-      await connection.promise().query(queryUpdate, [nuevoStock, Cproducto]);
-  
-      connection.end(); // Liberar recursos BD
-      connection.destroy();
-  
-      // Devolver la respuesta exitosa
-      res.status(200).json({ mensaje: 'Stock actualizado correctamente' });
-    } catch (error) {
-      console.error('Error al restar stock:', error);
-      res.status(500).json({ error: 'Error al restar stock' });
-    }
-  });
+app.get('/clientes', async (req, res) => { // GET Clientes
+  try {
+    const connection = await abrirConexion();
+    const query = 'SELECT * FROM CLIENTES';
+    const [resultado] = await connection.promise().query(query);
+    connection.end(); // Libera recursos BD
+    res.json([resultado]); // Resultado servido en HTTP formato JSON  
+  } catch (error) {
+    console.error('Error al obtener estudiantes:', error);
+    res.status(500).json({ error: 'Error al obtener estudiantes' });
+  }
+});
   
 
 

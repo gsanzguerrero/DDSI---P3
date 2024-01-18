@@ -1,11 +1,78 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, StyleSheet, Image } from 'react-native';
-import { useNavigate } from 'react-router-native';
+import { DataTable, FAB, IconButton} from 'react-native-paper';
+import { View, Text, Pressable, StyleSheet, Image, Platform } from 'react-native';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-native';
+import dayjs from 'dayjs';
+const useHost = () => {
+  if (Platform.OS === 'android') {
+    return 'http://10.0.2.2:5050/clientes';
+  } else {
+    return 'http://localhost:5050/clientes';
+  }
+};
+
+const Cabecera = () => {
+  return (
+    <DataTable.Header>
+      <DataTable.Title>ID (Email)</DataTable.Title>
+      <DataTable.Title>Nombre</DataTable.Title>
+      <DataTable.Title>Nombre de Usuario</DataTable.Title>
+      <DataTable.Title>Contraseña</DataTable.Title>
+      <DataTable.Title>Domicilio</DataTable.Title>
+      <DataTable.Title>Puntos</DataTable.Title>
+      <DataTable.Title>Fecha nacimiento</DataTable.Title>
+      <DataTable.Title>Datos de pago</DataTable.Title>
+      <DataTable.Title>Acciones</DataTable.Title>
+    </DataTable.Header>
+  );
+};
 
 const Clientes = () => {
   const [stockData, setStockData] = useState([]);
   const navigate = useNavigate();
+  const [filas, setFilas] = useState([]);
+  const [pagina, setPagina] = useState(1);
+  const host = useHost();
+  const [itemsPorPagina] = useState(10); // Ajustar preferencia
+
+  const handleAdd = () => { // Función añadir
+    navigate('/crearcliente');
+  };
+
+  const handleDelete = (id) => { // Función borrar
+    axios.delete(`http://localhost:5050/borrarAlumno/${id}`)
+    .then((response) => {
+      navigate('/confirmaciones', { state: { mensaje: '¡Alumno eliminado con éxito!' } });
+      })
+      .catch((error) => console.error('Error al eliminar:', error));
+  };
+
+	const handleEdit = (ide) => {
+		navigate('/admin/editaralumno', { state: { id: ide }})
+	};
+
+  const handlePageChange = (page) => {  
+    setPagina(page);
+  };
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(host);
+        const resultado = response.data[0];
+        // Aplicar la paginación
+        const inicio = (pagina - 1) * itemsPorPagina;
+        const fin = inicio + itemsPorPagina;
+        const filasPaginadas = resultado.slice(inicio, fin);
+        setFilas(filasPaginadas);
+      } catch (error) {
+        console.error('Error al realizar la solicitud:', error);
+      }
+    };
+
+    fetchData();
+  }, [host, pagina]); // dependencia para que useEffect se ejecute cuando cambie
 
   useEffect(() => {
     // Llamada a la API al cargar el componente
@@ -26,13 +93,48 @@ const Clientes = () => {
   };
 
   return (
+    <View>
     <View style={styles.container}>
       <View style={styles.header}>
         <Image style={styles.image} source={require('../../LogoMcAndCheese.png')} />
         <Text style={styles.title}>McAndCheese - Práctica 3</Text>
       </View>
+    </View>
       <Text style={styles.title}>Subsistema de Clientes</Text>
-
+      <View style={styles.table}>
+      {/* Encabezado de la tabla */}
+      <Cabecera />
+      {/* Datos de la tabla */}
+      <DataTable>
+        {filas.map((item) => (
+          <DataTable.Row key={item.IdCliente}>
+            <DataTable.Cell>{item.IdCliente}</DataTable.Cell>
+            <DataTable.Cell>{item.Nombre}</DataTable.Cell>
+            <DataTable.Cell>{item.UserName}</DataTable.Cell>
+            <DataTable.Cell>{item.Contrasenia}</DataTable.Cell>
+            <DataTable.Cell>{item.Domicilio}</DataTable.Cell>
+            <DataTable.Cell>{item.Puntos}</DataTable.Cell>
+            <DataTable.Cell>{dayjs(item.FechaNacimiento).format('DD/MM/YYYY')}</DataTable.Cell>
+            <DataTable.Cell>{item.DatosDePago}</DataTable.Cell>
+            {/* Botones de las filas */}
+            <IconButton icon="pencil" onPress={() => handleEdit(item.id)} />
+            <IconButton icon="delete" onPress={() => handleDelete(item.id)} />
+          </DataTable.Row>
+        ))}
+        <DataTable.Pagination
+        page={pagina} /* Página actual */
+        numberOfPages={Math.ceil(filas.length / itemsPorPagina)} /* Paginas = Filas/itemsXPagina */
+        onPageChange={handlePageChange}
+        label={`${pagina} de ${Math.ceil(filas.length / itemsPorPagina)}`} // Etiqueta
+      />
+      </DataTable>
+      <FAB
+        icon="plus"
+        style={styles.fabStyle}
+        color='white'
+        onPress={() => handleAdd()}
+      />
+    </View>
       <Pressable style={[styles.pressableButton, { alignSelf: 'center' }]} onPress={() => handleButtonClick('/')}>
         <Text style={styles.pressableText}>Volver</Text>
       </Pressable>
@@ -55,6 +157,7 @@ const styles = StyleSheet.create({
       fontSize: 20,
       fontWeight: 'bold',
       marginLeft: 20,
+      alignSelf: 'center'
     },
     image: {
       width: 200, // Ajusta el ancho según tus necesidades
@@ -86,6 +189,15 @@ const styles = StyleSheet.create({
       marginTop: 100,
       fontSize: 14,
       fontWeight: 'bold'
-    }
+    },
+    table: {
+      margin: 10,
+      },
+      fabStyle: {
+        width: 55,
+       backgroundColor: '#049CDC',
+       alignSelf: 'right',
+       justifyContent: 'center',
+     }
   });
 export default Clientes;

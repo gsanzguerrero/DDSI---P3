@@ -7,6 +7,7 @@ import Pedidos from './Pedidos/Pedidos';
 import Reservas from './Reservas/Reservas';
 import Trabajadores from './Trabajadores/Trabajadores';
 import Mensaje from './Mensaje';
+import CrearCliente from './Clientes/CrearCliente';
 
 const Index = () => {
   return (
@@ -20,6 +21,7 @@ const Index = () => {
           <Route path='/reservas' exact element={<Reservas/>}/>
           <Route path='/trabajadores' exact element={<Trabajadores/>}/>
           <Route path="/mensaje" exact element={<Mensaje/>}/>
+          <Route path="/crearcliente" exact element={<CrearCliente/>}/>
         </Routes>
       </View>
     </NativeRouter>

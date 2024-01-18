@@ -17,7 +17,9 @@ const App = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Image style={styles.image} source={require('../LogoMcAndCheese.png')} />
-        <Text style={styles.title}>McAndCheese - Práctica 3</Text>
+        <Text style={styles.title}>McAndCheese - Práctica 3
+        
+        </Text>
       </View>
       <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/menu')}>
           <Text style={styles.pressableText}>Subsistema de Menú</Text>
