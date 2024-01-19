@@ -54,19 +54,19 @@ app.post('/reiniciar', async (req, res) => {
       'CREATE TABLE IF NOT EXISTS TRABAJADOR(IdTrabajador INT,Turno INT,PRIMARY KEY(IdTrabajador));',
       'CREATE TABLE IF NOT EXISTS PEDIDO(IdPedido INT,Valoracion INT,TPago VARCHAR(10) CHECK (TPago IN (\'Tarjeta\',\'Efectivo\',\'Puntos\')),Estado VARCHAR(10) CHECK (Estado IN (\'Activo\',\'Inactivo\')),PRIMARY KEY(IdPedido));',
       'CREATE TABLE IF NOT EXISTS RESERVAS(IdReserva INT,IdMesa INT,PRIMARY KEY(IdReserva));',
-      'CREATE TABLE IF NOT EXISTS CLIENTES(IdCliente INT,Valoracion INT,Nombre VARCHAR(40),UserName VARCHAR(10),Contrasenia VARCHAR(40),Domicilio VARCHAR(40),Puntos INT,FechaNacimiento DATETIME,DatosDePago VARCHAR(30),PRIMARY KEY(IdCliente));',
+      'CREATE TABLE IF NOT EXISTS CLIENTES(IdCliente VARCHAR(40),Valoracion INT,Nombre VARCHAR(40),UserName VARCHAR(40),Contrasenia VARCHAR(40),Domicilio VARCHAR(40),Puntos INT,FechaNacimiento DATETIME,DatosDePago VARCHAR(30),PRIMARY KEY(IdCliente));',
       'CREATE TABLE IF NOT EXISTS ALERGENOS(IdAlergeno INT,Nombre VARCHAR(40),Descripcion VARCHAR(40),PRIMARY KEY(IdAlergeno));',
       'CREATE TABLE IF NOT EXISTS INGREDIENTES(IdIngrediente INT,Nombre VARCHAR(40),NumStock INT CHECK (NumStock >= 0),PRIMARY KEY(IdIngrediente));',
       'CREATE TABLE IF NOT EXISTS RECETAS(IdReceta INT,Precio INT CHECK (Precio >= 1),PRIMARY KEY(IdReceta));',
       'CREATE TABLE IF NOT EXISTS RESERVAS_PEDIDO(IdReserva INT,IdPedido INT,NumPersonas INT,HoraIni DATETIME,PRIMARY KEY(IdPedido,IdReserva),FOREIGN KEY(IdReserva) REFERENCES RESERVAS(IdReserva),FOREIGN KEY(IdPedido) REFERENCES PEDIDO(IdPedido));',
       'CREATE TABLE IF NOT EXISTS TRABAJADOR_PEDIDO(IdTrabajador INT,IdPedido INT,PRIMARY KEY(IdTrabajador,IdPedido),FOREIGN KEY(IdPedido) REFERENCES PEDIDO(IdPedido),FOREIGN KEY(IdTrabajador) REFERENCES TRABAJADOR(IdTrabajador));',
-      'CREATE TABLE IF NOT EXISTS CLIENTES_PEDIDO(IdCliente INT,IdPedido INT,PRIMARY KEY(IdPedido,IdCliente),FOREIGN KEY(IdPedido) REFERENCES PEDIDO(IdPedido),FOREIGN KEY(IdCliente) REFERENCES CLIENTES(IdCliente));',
+      'CREATE TABLE IF NOT EXISTS CLIENTES_PEDIDO(IdCliente VARCHAR(40),IdPedido INT,PRIMARY KEY(IdPedido,IdCliente),FOREIGN KEY(IdPedido) REFERENCES PEDIDO(IdPedido),FOREIGN KEY(IdCliente) REFERENCES CLIENTES(IdCliente));',
       'CREATE TABLE IF NOT EXISTS PEDIDO_RECETAS(IdReceta INT,IdPedido INT,PRIMARY KEY(IdPedido,IdReceta),FOREIGN KEY(IdPedido) REFERENCES PEDIDO(IdPedido),FOREIGN KEY(IdReceta) REFERENCES RECETAS(IdReceta));',
-      'CREATE TABLE IF NOT EXISTS CLIENTES_ALERGENOS(IdCliente INT,IdAlergeno INT,PRIMARY KEY(IdCliente,IdAlergeno),FOREIGN KEY(IdCliente) REFERENCES CLIENTES(IdCliente),FOREIGN KEY(IdAlergeno) REFERENCES ALERGENOS(IdAlergeno));',
+      'CREATE TABLE IF NOT EXISTS CLIENTES_ALERGENOS(IdCliente VARCHAR(40),IdAlergeno INT,PRIMARY KEY(IdCliente,IdAlergeno),FOREIGN KEY(IdCliente) REFERENCES CLIENTES(IdCliente),FOREIGN KEY(IdAlergeno) REFERENCES ALERGENOS(IdAlergeno));',
       'CREATE TABLE IF NOT EXISTS RECETAS_INGREDIENTES(IdReceta INT,IdIngrediente INT,PRIMARY KEY(IdReceta,IdIngrediente),FOREIGN KEY(IdReceta) REFERENCES RECETAS(IdReceta),FOREIGN KEY(IdIngrediente) REFERENCES INGREDIENTES(IdIngrediente));',
       'CREATE TABLE IF NOT EXISTS INGREDIENTES_ALERGENOS(IdIngrediente INT,IdAlergeno INT,PRIMARY KEY(IdAlergeno,IdIngrediente),FOREIGN KEY(IdAlergeno) REFERENCES ALERGENOS(IdAlergeno),FOREIGN KEY(IdIngrediente) REFERENCES INGREDIENTES(IdIngrediente));',
       
-      `CREATE TRIGGER IF NOT EXISTS ActualizarStock 
+      `CREATE TRIGGER ActualizarStock 
       BEFORE INSERT ON PEDIDO_RECETAS 
       FOR EACH ROW 
       BEGIN 
@@ -80,7 +80,7 @@ app.post('/reiniciar', async (req, res) => {
           WHERE ir.IdReceta = NEW.IdReceta; 
       END;`,
 
-      `CREATE TRIGGER IF NOT EXISTS RestarPuntos
+      `CREATE TRIGGER RestarPuntos
       BEFORE INSERT ON CLIENTES_PEDIDO
       FOR EACH ROW
       BEGIN
@@ -112,7 +112,7 @@ app.post('/reiniciar', async (req, res) => {
           END IF;
       END;`,
 
-      `CREATE TRIGGER IF NOT EXISTS RellenarStock
+      `CREATE TRIGGER RellenarStock
       AFTER INSERT ON PEDIDO_RECETAS
       FOR EACH ROW
       BEGIN
@@ -131,7 +131,7 @@ app.post('/reiniciar', async (req, res) => {
           END IF;
       END;`,
       
-      `CREATE TRIGGER IF NOT EXISTS ContieneAlergeno
+      `CREATE TRIGGER ContieneAlergeno
       BEFORE INSERT ON CLIENTES_PEDIDO
       FOR EACH ROW
       BEGIN
@@ -152,8 +152,8 @@ app.post('/reiniciar', async (req, res) => {
         END IF;
       END;
       `,
-      `INSERT INTO CLIENTES ('IdCliente', 'Valoracion', 'Nombre', 'UserName', 'Contrasenia', 'Domicilio', 'Puntos', 'FechaNacimiento', 'DatosDePago') VALUES ('gonzalo@miemail.com', NULL, 'Gonzalo Sanz Guerrero', 'gonzasanz_', '1234abc', 'Calle A', 0, '2012-12-12 00:00:00', '123A');`,
-      `INSERT INTO CLIENTES ('IdCliente', 'Valoracion', 'Nombre', 'UserName', 'Contrasenia', 'Domicilio', 'Puntos', 'FechaNacimiento', 'DatosDePago') VALUES ('jose', NULL, 'José Manuel Aranda Gutierrez', 'josemanuelaranda_', '12346ma', 'Calle B', 0, '2012-12-12 00:00:00', '123B');`
+      `INSERT INTO CLIENTES (\`IdCliente\`, \`Valoracion\`, \`Nombre\`, \`UserName\`, \`Contrasenia\`, \`Domicilio\`, \`Puntos\`, \`FechaNacimiento\`, \`DatosDePago\`) VALUES ('gonzalo@miemail.com', NULL, 'Gonzalo Sanz Guerrero', 'gonzasanz_', '1234abc', 'Calle A', 0, '2012-12-12 00:00:00', '123A');`,
+      `INSERT INTO CLIENTES (\`IdCliente\`, \`Valoracion\`, \`Nombre\`, \`UserName\`, \`Contrasenia\`, \`Domicilio\`, \`Puntos\`, \`FechaNacimiento\`, \`DatosDePago\`) VALUES ('jose', NULL, 'José Manuel Aranda Gutierrez', 'josemanuelaranda_', '12346ma', 'Calle B', 0, '2012-12-12 00:00:00', '123B');`
     ];
 
     // Ejecutar las sentencias SQL
