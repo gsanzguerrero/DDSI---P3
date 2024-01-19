@@ -20,7 +20,7 @@
   - Correo electrónico ugr: 
   - Grupo: A3
  
-  #Sistema Mc and cheese
+  # Sistema Mc and cheese:
   Este repositorio contiene la implementación final de nuestro sistema Mc and cheese utilizando todas las herramientas aprendidas a lo largo del curso.
 
   # 0. Índice
