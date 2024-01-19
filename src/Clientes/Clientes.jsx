@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-native';
 import dayjs from 'dayjs';
+
 const useHost = () => {
   if (Platform.OS === 'android') {
     return 'http://10.0.2.2:5050/clientes';
@@ -41,15 +42,16 @@ const Clientes = () => {
   };
 
   const handleDelete = (id) => { // Función borrar
-    axios.delete(`http://localhost:5050/borrarAlumno/${id}`)
+    console.log(id);
+    axios.delete(`http://localhost:5050/borrarcliente/${id}`)
     .then((response) => {
-      navigate('/confirmaciones', { state: { mensaje: '¡Alumno eliminado con éxito!' } });
+      this.forceUpdate();
       })
       .catch((error) => console.error('Error al eliminar:', error));
   };
 
 	const handleEdit = (ide) => {
-		navigate('/admin/editaralumno', { state: { id: ide }})
+		navigate('/editarcliente', { state: { id: ide }})
 	};
 
   const handlePageChange = (page) => {  
@@ -114,11 +116,11 @@ const Clientes = () => {
             <DataTable.Cell>{item.Contrasenia}</DataTable.Cell>
             <DataTable.Cell>{item.Domicilio}</DataTable.Cell>
             <DataTable.Cell>{item.Puntos}</DataTable.Cell>
-            <DataTable.Cell>{dayjs(item.FechaNacimiento).format('DD/MM/YYYY')}</DataTable.Cell>
+            <DataTable.Cell>{item.FechaNacimiento}</DataTable.Cell>
             <DataTable.Cell>{item.DatosDePago}</DataTable.Cell>
             {/* Botones de las filas */}
-            <IconButton icon="pencil" onPress={() => handleEdit(item.id)} />
-            <IconButton icon="delete" onPress={() => handleDelete(item.id)} />
+            <IconButton icon="pencil" onPress={() => handleEdit(item.IdCliente)} />
+            <IconButton icon="delete" onPress={() => handleDelete(item.IdCliente)} />
           </DataTable.Row>
         ))}
         <DataTable.Pagination

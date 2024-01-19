@@ -132,7 +132,7 @@ const CrearCliente = ()=>{
             />
             <View style={styles.button}>
                 <Pressable style={styles.pressableButton} onPress={handleCreateCliente}>
-                    <Text style={styles.pressableText}>Crear Alumno</Text>
+                    <Text style={styles.pressableText}>Crear Cliente</Text>
                 </Pressable> 
             </View>
 
