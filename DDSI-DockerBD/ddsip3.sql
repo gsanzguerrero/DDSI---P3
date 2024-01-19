@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: db:3306
--- Tiempo de generación: 18-01-2024 a las 17:54:08
+-- Tiempo de generación: 19-01-2024 a las 10:47:43
 -- Versión del servidor: 5.7.44
 -- Versión de PHP: 8.2.8
 
@@ -47,7 +47,7 @@ CREATE TABLE `CLIENTES` (
   `Contrasenia` varchar(40) DEFAULT NULL,
   `Domicilio` varchar(40) DEFAULT NULL,
   `Puntos` int(11) DEFAULT NULL,
-  `FechaNacimiento` datetime DEFAULT NULL,
+  `FechaNacimiento` varchar(20) DEFAULT NULL,
   `DatosDePago` varchar(30) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -56,8 +56,8 @@ CREATE TABLE `CLIENTES` (
 --
 
 INSERT INTO `CLIENTES` (`IdCliente`, `Valoracion`, `Nombre`, `UserName`, `Contrasenia`, `Domicilio`, `Puntos`, `FechaNacimiento`, `DatosDePago`) VALUES
-('gonzalo@miemail.com', NULL, 'Gonzalo Sanz Guerrero', 'gonzasanz_', '1234abc', 'Calle A', 0, '2012-12-12 00:00:00', '123A'),
-('jose', NULL, 'José Manuel Aranda Gutierrez', 'josemanuelaranda_', '12346ma', 'Calle B', 0, '2012-12-12 00:00:00', '123B');
+('gonzalo@miemail.com', NULL, 'Gonzalo Sanz Guerrero', 'gonzasanz_', '1234abc', 'Calle A', 0, '2012-12-12', '123ABC'),
+('jose', NULL, 'José Manuel Aranda Gutierrez', 'josemanuelaranda_', '12346ma', 'Calle B', 0, '2012-12-12', '123B');
 
 -- --------------------------------------------------------
 
