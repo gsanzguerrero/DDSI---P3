@@ -45,13 +45,12 @@ CREATE TABLE IF NOT EXISTS RESERVAS (
 
 CREATE TABLE IF NOT EXISTS CLIENTES (
     IdCliente VARCHAR(40),
-    Valoracion INT,
     Nombre VARCHAR(40),
     UserName VARCHAR(40),
     Contrasenia VARCHAR(40),
     Domicilio VARCHAR(40),
     Puntos INT,
-    FechaNacimiento DATETIME,
+    FechaNacimiento VARCHAR(40),
     DatosDePago VARCHAR(30),
     PRIMARY KEY(IdCliente)
 );
@@ -142,7 +141,7 @@ CREATE TABLE IF NOT EXISTS INGREDIENTES_ALERGENOS (
 
 DELIMITER //
 --Disminuye el Stock tras una insercción en la tabla PEDIDO_RECETAS, en caso de ser menor a 10 suma 200
---SERÍA NECESARIO ROLLBACK
+--Este trigger llamaría al comprobarStockNegativo
 CREATE TRIGGER ActualizarStock AFTER INSERT ON PEDIDO_RECETAS
 FOR EACH ROW
 BEGIN
@@ -161,16 +160,18 @@ END;
 //
 
 --Si el Stock se va a actualizar a un valor negativo indica que no se puede gestionar un pedido tan grande
+--SERÍA NECESARIO ROLLBACK
 CREATE TRIGGER ComprobarStockNoNegativo BEFORE UPDATE ON INGREDIENTES
 FOR EACH ROW
 BEGIN
     IF NEW.NumStock < 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NO QUEDAN SUFICIENTES EXISTENCIAS PARA UN PEDIDO TAN GRANDE';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NO DEBE DE HABER STOCK NEGATIVO';
     END IF;
 END;
 //
 
 --Evita que se inserte un numero negativo en Stock al inicializar una fila
+--SERÍA NECESARIO ROLLBACK
 CREATE TRIGGER ComprobarStockNoNegativoInit BEFORE INSERT ON INGREDIENTES
 FOR EACH ROW
 BEGIN
@@ -181,7 +182,7 @@ END;
 //
 
 --En caso de que el metodo de pago elegido en el pedido sea puntos se resta el precio de las recetas del pedido al numero de puntos y en caso de no poder serlo salta un error 
---SERÍA NECESARIO ROLLBACK
+--En caso de numero negativo llamaría a trigger ComprobarPuntosNoNegativos
 CREATE TRIGGER RestarPuntos AFTER INSERT ON PEDIDO_RECETAS
 FOR EACH ROW
 BEGIN
@@ -314,7 +315,7 @@ END;
 //
 
 --No se permite iniciar el bono a un valor mayor de 500 ni numeros negativos, si esto no se cumple se asignan valores por defecto
-CREATE TRIGGER BonoIniMenor500 BEFORE INSERT ON TRABAJADOR
+CREATE TRIGGER BonoMenor500Init BEFORE INSERT ON TRABAJADOR
 FOR EACH ROW
 BEGIN
     SET NEW.Bono = CASE
@@ -338,7 +339,7 @@ END;
 //
 
 --No se permite iniciar la Valoracion a un valor mayor de 10 ni numeros negativos, si esto no se cumple se asignan valores por defecto
-CREATE TRIGGER ValoracionIniMenor10 BEFORE INSERT ON PEDIDO
+CREATE TRIGGER ValoracionMenor10Init BEFORE INSERT ON PEDIDO
 FOR EACH ROW
 BEGIN
     SET NEW.Valoracion = CASE
@@ -346,6 +347,138 @@ BEGIN
         WHEN NEW.Valoracion < 0 THEN 0
         ELSE NEW.Valoracion
     END;
+END;
+//
+
+--Evita que se inserte un numero negativo en Precio al inicializar una fila
+--SERÍA NECESARIO ROLLBACK
+CREATE TRIGGER PrecioPositivoInit BEFORE INSERT ON RECETAS
+FOR EACH ROW
+BEGIN
+    IF NEW.Precio < 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NO PUEDE HABER UN PRECIO NEGATIVO';
+    END IF;
+END;
+//
+
+--Evita que se inserte un numero negativo en Precio al actualizar una fila
+--SERÍA NECESARIO ROLLBACK
+CREATE TRIGGER PrecioPositivo BEFORE UPDATE ON RECETAS
+FOR EACH ROW
+BEGIN
+    IF NEW.Precio < 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NO PUEDE HABER UN PRECIO NEGATIVO';
+    END IF;
+END;
+//
+
+--En caso de que el estado inicializado no pertenezca a ninguno de los valores insertados en el rango dará error
+--SERÍA NECESARIO ROLLBACK
+CREATE TRIGGER EstadoEnRangoInit BEFORE INSERT ON PEDIDO
+FOR EACH ROW
+BEGIN
+    IF NEW.Estado != 'Activo' AND  NEW.Estado != 'Inactivo' THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'FUERA DEL RANGO VALIDO';
+    END IF;
+END;
+//
+
+--En caso de que el estado actualizado no pertenezca a ninguno de los valores insertados en el rango dará error
+--SERÍA NECESARIO ROLLBACK
+CREATE TRIGGER EstadoEnRango BEFORE UPDATE ON PEDIDO
+FOR EACH ROW
+BEGIN
+    IF NEW.Estado != 'Activo' AND  NEW.Estado != 'Inactivo' THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'FUERA DEL RANGO VALIDO';
+    END IF;
+END;
+//
+
+--En caso de que el TPago inicializado no pertenezca al rango dará error
+--SERÍA NECESARIO ROLLBACK
+CREATE TRIGGER TipoDePagoEnRangoInit BEFORE INSERT ON PEDIDO
+FOR EACH ROW
+BEGIN
+    IF NEW.TPago != ('Tarjeta' AND 'Efectivo' AND 'Puntos') THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'TIPO DE PAGO INVALIDO';
+    END IF;
+END;
+//
+
+--En caso de que el TPago actualizado no pertenezca al rango dará error
+--SERÍA NECESARIO ROLLBACK
+CREATE TRIGGER TipoDePagoEnRango BEFORE INSERT ON PEDIDO
+FOR EACH ROW
+BEGIN
+    IF NEW.TPago != ('Tarjeta' AND 'Efectivo' AND 'Puntos') THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'TIPO DE PAGO INVALIDO';
+    END IF;
+END;
+//
+
+--Evita que se inserte un numero negativo en Recetas al inicializar una fila
+--SERÍA NECESARIO ROLLBACK
+CREATE TRIGGER NumRecetasPositivoInit BEFORE INSERT ON PEDIDO_RECETAS
+FOR EACH ROW
+BEGIN
+    IF NEW.numero < 1 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NO PUEDE HABER UN NUMERO DE PLATOS NEGATIVOS O 0 EN EL PEDIDO';
+    END IF;
+END;
+//
+
+--Evita que se inserte un numero negativo en Recetas al actualizar una fila
+--SERÍA NECESARIO ROLLBACK
+CREATE TRIGGER NumRecetasPositivoInit BEFORE UPDATE ON PEDIDO_RECETAS
+FOR EACH ROW
+BEGIN
+    IF NEW.numero < 1 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NO PUEDE HABER UN NUMERO DE PLATOS NEGATIVOS O 0 EN EL PEDIDO';
+    END IF;
+END;
+//
+
+--Evita que se inserte un numero negativo en Ingredientes al inicializar una fila
+--SERÍA NECESARIO ROLLBACK
+CREATE TRIGGER NumIngredientesPositivo BEFORE INSERT ON RECETAS_INGREDIENTES
+FOR EACH ROW
+BEGIN
+    IF NEW.numero < 1 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NO PUEDE HABER UN NUMERO DE INGREDIENTES NEGATIVO O 0 EN LA RECETA';
+    END IF;
+END;
+//
+
+--Evita que se inserte un numero negativo en Ingredientes al actualizar una fila
+--SERÍA NECESARIO ROLLBACK
+CREATE TRIGGER NumIngredientesPositivoInit BEFORE UPDATE ON RECETAS_INGREDIENTES
+FOR EACH ROW
+BEGIN
+    IF NEW.numero < 1 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NO PUEDE HABER UN NUMERO DE INGREDIENTES NEGATIVO O 0 EN LA RECETA';
+    END IF;
+END;
+//
+
+--Evita que se inserte un numero negativo en NumPersonas al inicializar una fila
+--SERÍA NECESARIO ROLLBACK
+CREATE TRIGGER NumNumPersonasPositivo BEFORE INSERT ON RESERVAS_PEDIDO
+FOR EACH ROW
+BEGIN
+    IF NEW.NumPersonas < 1 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NO PUEDE HABER UN NUMERO DE DE PERSONAS NEGATIVO O 0 EN LA MESA';
+    END IF;
+END;
+//
+
+--Evita que se inserte un numero negativo en NumPersonas al actualizar una fila
+--SERÍA NECESARIO ROLLBACK
+CREATE TRIGGER NumNumPersonasPositivoInit BEFORE UPDATE ON RESERVAS_PEDIDO
+FOR EACH ROW
+BEGIN
+    IF NEW.NumPersonas < 1 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NO PUEDE HABER UN NUMERO DE DE PERSONAS NEGATIVO O 0 EN LA MESA';
+    END IF;
 END;
 //
 
