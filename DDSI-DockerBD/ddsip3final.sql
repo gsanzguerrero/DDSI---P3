@@ -140,8 +140,10 @@ CREATE TABLE IF NOT EXISTS INGREDIENTES_ALERGENOS (
 
 
 DELIMITER //
+
 --Disminuye el Stock tras una insercción en la tabla PEDIDO_RECETAS, en caso de ser menor a 10 suma 200
 --Este trigger llamaría al comprobarStockNegativo
+
 CREATE TRIGGER ActualizarStock AFTER INSERT ON PEDIDO_RECETAS
 FOR EACH ROW
 BEGIN
@@ -157,6 +159,7 @@ BEGIN
     END
     WHERE RECETAS_INGREDIENTES.IdReceta = NEW.IdReceta;
 END;
+
 //
 
 --Si el Stock se va a actualizar a un valor negativo indica que no se puede gestionar un pedido tan grande
@@ -168,6 +171,7 @@ BEGIN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NO DEBE DE HABER STOCK NEGATIVO';
     END IF;
 END;
+
 //
 
 --Evita que se inserte un numero negativo en Stock al inicializar una fila
@@ -179,6 +183,7 @@ BEGIN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NO PUEDE HABER STOCK NEGATIVO';
     END IF;
 END;
+
 //
 
 --En caso de que el metodo de pago elegido en el pedido sea puntos se resta el precio de las recetas del pedido al numero de puntos y en caso de no poder serlo salta un error 
@@ -227,6 +232,7 @@ BEGIN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NO PUEDE HABER PUNTOS NEGATIVOS';
     END IF;
 END;
+//
 
 --Si alguna de las recetas del pedido contiene un alergeno dentro del listado de los del cliente, indica que hay un alergeno en el pedido
 --SERÍA NECESARIO ROLLBACK
